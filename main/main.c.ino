@@ -11,6 +11,8 @@ IPAddress ip(192, 168 , 7, 100);
 IPAddress gateway(192, 168, 7, 1);
 IPAddress subnet(255, 255, 255, 0);
 
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
 
@@ -52,7 +54,7 @@ void setup() {
   }
 
   // Start UDP listening port
-  Udp.begin(localPort);
+  Udp.begin(write_probe_port_1);
 }
 
 void loop() {
@@ -102,7 +104,7 @@ void loop() {
       // READ VOLTAGE
       // Send our probe 1 value
       Serial.write("READ VALUE\n");
-      int input_value = digitalRead(INPUT_PIN);
+      int input_value = digitalRead(READ_PIN_1);
       Serial.print(input_value);
       Serial.write("\n");
 
@@ -113,7 +115,7 @@ void loop() {
       }
 
       Serial.println("Sending packet");
-      Udp.beginPacket(controller_ip, read_probe_port);
+      Udp.beginPacket(controller_ip, read_probe_port_1);
       Udp.write(parsed_value);
       Udp.endPacket();
 
