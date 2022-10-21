@@ -19,12 +19,20 @@ EthernetUDP Udp;
 bool ready = false; 
 
 int write_probe_port_1 = 1001;
+int write_probe_port_2 = 1002;
+int write_probe_port_3 = 1003;
 int read_probe_port_1 = 2001;
 
 const int READ_PIN_1 = 9;
 const int WRITE_PIN_1 = 10;
+const int WRITE_PIN_2 = 11;
+const int WRITE_PIN_3 = 12;
 
 const char * controller_ip = "192.168.7.5";
+
+EthernetUDP udpserver1;
+EthernetUDP udpserver2;
+EthernetUDP udpserver3;
 
 void setup() {
   // Configure the ethernet shield
@@ -53,8 +61,12 @@ void setup() {
     }
   }
 
-  // Start UDP listening port
-  Udp.begin(write_probe_port_1);
+  udpserver1.begin(write_probe_port_1);
+  udpserver2.begin(write_probe_port_2);
+  udpserver3.begin(write_probe_port_3);
+
+  Udp.begin(read_probe_port_1);
+
 }
 
 void loop() {
@@ -68,13 +80,13 @@ void loop() {
     if (true)  {
       // WRITE VOLTAGE 
       // Check if we need to write any voltage 
-      int packetSize = Udp.parsePacket();
+      int packetSize = udpserver1.parsePacket();
 
       if (packetSize) {
-        Serial.print("Received packet of size ");
+        Serial.print("Received udp server 1 packet of size ");
         Serial.println(packetSize);
         Serial.print("From ");
-        IPAddress remote = Udp.remoteIP();
+        IPAddress remote = udpserver1.remoteIP();
         for (int i=0; i < 4; i++) {
           Serial.print(remote[i], DEC);
           if (i < 3) {
@@ -82,10 +94,10 @@ void loop() {
           }
         }
         Serial.print(", port ");
-        Serial.println(Udp.remotePort());
+        Serial.println(udpserver1.remotePort());
 
         // read the packet into packetBufffer
-        Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+        udpserver1.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
         Serial.println("Contents2:");
         Serial.println(packetBuffer);
         Serial.println("Length:");
@@ -103,9 +115,79 @@ void loop() {
         }
       }
 
+      packetSize = udpserver2.parsePacket();
+
+      if (packetSize) {
+        Serial.print("Received udp server 2 packet of size ");
+        Serial.println(packetSize);
+        Serial.print("From ");
+        IPAddress remote = udpserver2.remoteIP();
+        for (int i=0; i < 4; i++) {
+          Serial.print(remote[i], DEC);
+          if (i < 3) {
+            Serial.print(".");
+          }
+        }
+        Serial.print(", port ");
+        Serial.println(udpserver2.remotePort());
+
+        // read the packet into packetBufffer
+        udpserver2.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+        Serial.println("Contents2:");
+        Serial.println(packetBuffer);
+        Serial.println("Length:");
+        Serial.println(strlen(packetBuffer));
+
+        // Parse the packet 
+        if (packetBuffer[0] == '1'){
+          digitalWrite(WRITE_PIN_2, HIGH);
+        }
+        else if (packetBuffer[0] == '0'){
+          digitalWrite(WRITE_PIN_2, LOW);
+        }
+        else {
+          Serial.println("ERROR: Unknown packet buffer");
+        }
+      }
+
+      packetSize = udpserver3.parsePacket();
+
+      if (packetSize) {
+        Serial.print("Received udp server 3 packet of size ");
+        Serial.println(packetSize);
+        Serial.print("From ");
+        IPAddress remote = udpserver3.remoteIP();
+        for (int i=0; i < 4; i++) {
+          Serial.print(remote[i], DEC);
+          if (i < 3) {
+            Serial.print(".");
+          }
+        }
+        Serial.print(", port ");
+        Serial.println(udpserver3.remotePort());
+
+        // read the packet into packetBufffer
+        udpserver3.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+        Serial.println("Contents2:");
+        Serial.println(packetBuffer);
+        Serial.println("Length:");
+        Serial.println(strlen(packetBuffer));
+
+        // Parse the packet 
+        if (packetBuffer[0] == '1'){
+          digitalWrite(WRITE_PIN_3, HIGH);
+        }
+        else if (packetBuffer[0] == '0'){
+          digitalWrite(WRITE_PIN_3, LOW);
+        }
+        else {
+          Serial.println("ERROR: Unknown packet buffer");
+        }
+      }
+
       // READ VOLTAGE
       // Send our probe 1 value
-      Serial.write("READ VALUE\n");
+      Serial.write("READ VALUE 1\n");
       int input_value = digitalRead(READ_PIN_1);
       Serial.print(input_value);
       Serial.write("\n");
