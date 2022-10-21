@@ -86,14 +86,16 @@ void loop() {
 
         // read the packet into packetBufffer
         Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-        Serial.println("Contents:");
+        Serial.println("Contents2:");
         Serial.println(packetBuffer);
+        Serial.println("Length:");
+        Serial.println(strlen(packetBuffer));
 
         // Parse the packet 
-        if (packetBuffer == "1"){
+        if (packetBuffer[0] == '1'){
           digitalWrite(WRITE_PIN_1, HIGH);
         }
-        else if (packetBuffer == "0"){
+        else if (packetBuffer[0] == '0'){
           digitalWrite(WRITE_PIN_1, LOW);
         }
         else {
@@ -108,22 +110,13 @@ void loop() {
       Serial.print(input_value);
       Serial.write("\n");
 
-      // Translate the voltage to binary. 
-      int parsed_value = 0;
-      if (input_value > 1){
-        parsed_value = 1;
-      }
-
       Serial.println("Sending packet");
       Udp.beginPacket(controller_ip, read_probe_port_1);
-      Udp.write(parsed_value);
+      Udp.write(input_value);
       Udp.endPacket();
 
     }
     else{
       Serial.println("Ethernet not connected");
     }
-
-    // How long should we delay?
-    delay(10);
 }
