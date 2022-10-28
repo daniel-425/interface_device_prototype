@@ -23,10 +23,10 @@ int write_probe_port_2 = 1002;
 int write_probe_port_3 = 1003;
 int read_probe_port_1 = 2001;
 
-const int READ_PIN_1 = 9;
-const int WRITE_PIN_1 = 10;
-const int WRITE_PIN_2 = 11;
-const int WRITE_PIN_3 = 12;
+const int READ_PIN_1 = 3;
+const int WRITE_PIN_1 = 5;
+const int WRITE_PIN_2 = 6;
+const int WRITE_PIN_3 = 7;
 
 const char * controller_ip = "192.168.7.5";
 
@@ -105,9 +105,11 @@ void loop() {
 
         // Parse the packet 
         if (packetBuffer[0] == '1'){
+          Serial.println("Writing PIN1 HIGH");
           digitalWrite(WRITE_PIN_1, HIGH);
         }
         else if (packetBuffer[0] == '0'){
+          Serial.println("Writing PIN1 LOW");
           digitalWrite(WRITE_PIN_1, LOW);
         }
         else {
@@ -187,7 +189,7 @@ void loop() {
 
       // READ VOLTAGE
       // Send our probe 1 value
-      Serial.write("READ VALUE 1\n");
+      Serial.write("READ VALUE\n");
       int input_value = digitalRead(READ_PIN_1);
       Serial.print(input_value);
       Serial.write("\n");
