@@ -24,8 +24,8 @@ int write_probe_port_3 = 1003;
 int read_probe_port_1 = 2001;
 
 const int READ_PIN_1 = 3;
-const int WRITE_PIN_1 = 5;
-const int WRITE_PIN_2 = 6;
+const int WRITE_PIN_1 = 9;
+const int WRITE_PIN_2 = 8;
 const int WRITE_PIN_3 = 7;
 
 const char * controller_ip = "192.168.7.5";
@@ -41,6 +41,8 @@ void setup() {
   // Set our pins
   pinMode(READ_PIN_1, INPUT);
   pinMode(WRITE_PIN_1, OUTPUT);
+  pinMode(WRITE_PIN_2, OUTPUT);
+  pinMode(WRITE_PIN_3, OUTPUT);
 
   // Start the Ethernet
   Ethernet.begin(mac, ip);
@@ -142,9 +144,11 @@ void loop() {
 
         // Parse the packet 
         if (packetBuffer[0] == '1'){
+          Serial.println("Writing PIN2 HIGH");
           digitalWrite(WRITE_PIN_2, HIGH);
         }
         else if (packetBuffer[0] == '0'){
+          Serial.println("Writing PIN2 LOW");
           digitalWrite(WRITE_PIN_2, LOW);
         }
         else {
@@ -177,9 +181,11 @@ void loop() {
 
         // Parse the packet 
         if (packetBuffer[0] == '1'){
+          Serial.println("Writing PIN3 HIGH");
           digitalWrite(WRITE_PIN_3, HIGH);
         }
         else if (packetBuffer[0] == '0'){
+          Serial.println("Writing PIN3 LOW");
           digitalWrite(WRITE_PIN_3, LOW);
         }
         else {
@@ -187,18 +193,32 @@ void loop() {
         }
       }
 
+      /*digitalWrite(WRITE_PIN_1, HIGH);
+      digitalWrite(WRITE_PIN_2, LOW);
+      digitalWrite(WRITE_PIN_3, LOW);*/
       // READ VOLTAGE
       // Send our probe 1 value
       Serial.write("READ VALUE\n");
       int input_value = digitalRead(READ_PIN_1);
-      Serial.print(input_value);
-      Serial.write("\n");
+
+      // Invert the result
+      int actual_val = 3;
+      if (input_value == HIGH){
+        actual_val = LOW;
+      }
+      else if (input_value == LOW){
+        actual_val = HIGH;
+      }
+      else{
+        actual_val = 3;
+      }
+      
+      Serial.println(actual_val);
 
       Serial.println("Sending packet");
       Udp.beginPacket(controller_ip, read_probe_port_1);
-      Udp.write(input_value);
+      Udp.write(actual_val);
       Udp.endPacket();
-
     }
     else{
       Serial.println("Ethernet not connected");
